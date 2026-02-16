@@ -1,29 +1,76 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { createTask, updateTask, fetchTaskById } from "../api/taskApi";
 
 function Create() {
+  const { id } = useParams(); // Get task ID from URL if editing
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    priority: "medium",
-    status: "pending",
+    priority: "MEDIUM",
+    status: "TODO",
+    dueDate: "",
   });
+
+  // Load task data if editing
+  useEffect(() => {
+    if (id) {
+      loadTask();
+    }
+  }, [id]);
+
+  async function loadTask() {
+    try {
+      const task = await fetchTaskById(id);
+      setFormData({
+        title: task.title,
+        description: task.description || "",
+        priority: task.priority,
+        status: task.status,
+        dueDate: task.dueDate || "",
+      });
+    } catch (err) {
+      console.error("Error loading task:", err);
+      alert("Failed to load task");
+    }
+  }
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Task:", formData);
+    setLoading(true);
+
+    try {
+      if (id) {
+        // Edit existing task
+        await updateTask(id, formData);
+        alert("Task updated successfully!");
+      } else {
+        // Create new task
+        await createTask(formData);
+        alert("Task created successfully!");
+      }
+      navigate("/dashboard"); // Go back to dashboard
+    } catch (err) {
+      console.error("Error saving task:", err);
+      alert("Failed to save task");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="create-container">
       <div className="create-card">
-        <h2>Create Task</h2>
+        <h2>{id ? "Edit Task" : "Create Task"}</h2>
 
         <form onSubmit={handleSubmit} className="create-form">
           <div className="form-section title">
-            <label>Title</label>
+            <label>Title *</label>
             <input
               type="text"
               name="title"
@@ -42,7 +89,6 @@ function Create() {
               onChange={handleChange}
               rows="3"
               placeholder="Describe the task"
-              required
             />
           </div>
 
@@ -54,9 +100,10 @@ function Create() {
                 value={formData.priority}
                 onChange={handleChange}
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
               </select>
             </div>
 
@@ -67,16 +114,36 @@ function Create() {
                 value={formData.status}
                 onChange={handleChange}
               >
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
+                <option value="TODO">Todo</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="REVIEW">Review</option>
+                <option value="DONE">Done</option>
               </select>
             </div>
           </div>
 
-          <button type="submit" className="create-submit-btn">
-            Create Task
-          </button>
+          <div className="form-section">
+            <label>Due Date</label>
+            <input
+              type="date"
+              name="dueDate"
+              value={formData.dueDate}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-actions">
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={() => navigate("/dashboard")}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="create-submit-btn" disabled={loading}>
+              {loading ? "Saving..." : id ? "Update Task" : "Create Task"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

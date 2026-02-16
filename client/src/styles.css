@@ -126,6 +126,20 @@ button {
   color: #64748b;
 }
 
+.create-task-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: #0ea5e9;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.create-task-btn:hover {
+  background-color: #0284c7;
+}
+
 .dashboard-tabs {
   background-color: #ffffff;
   border-bottom: 2px solid #e2e8f0;
@@ -596,8 +610,29 @@ button {
   gap: 16px;
 }
 
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.cancel-btn {
+  flex: 1;
+  padding: 10px 24px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #475569;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+  background-color: #cbd5e1;
+}
+
 .create-submit-btn {
-  width: 100%;
+  flex: 1;
   padding: 10px 24px;
   border-radius: 6px;
   background-color: #475569;
@@ -609,6 +644,11 @@ button {
 
 .create-submit-btn:hover {
   background-color: #334155;
+}
+
+.create-submit-btn:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
 }
 
 /* ========== RESPONSIVE ========== */

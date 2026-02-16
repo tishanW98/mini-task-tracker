@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import TaskItem from "../components/TaskItem";
 import { fetchTasks, deleteTask, updateTaskStatus } from "../api/taskApi";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,16 +53,24 @@ function Dashboard() {
   };
 
   const handleDelete = async (taskId) => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task? This action cannot be undone."
+    );
+    
+    if (!confirmed) return;
+
     try {
       await deleteTask(taskId);
       loadTasks();
     } catch (err) {
       console.error("Error deleting task:", err);
+      alert("Failed to delete task");
     }
   };
 
   const handleEdit = (taskId) => {
-    console.log("Edit task:", taskId);
+    navigate(`/edit/${taskId}`);
   };
 
   // Calculate completion percentage
@@ -86,8 +96,13 @@ function Dashboard() {
 
       <main className="dashboard-main">
         <div className="dashboard-header">
-          <h3>Today Tasks List</h3>
-          <span className="date">{todayDate}</span>
+          <div>
+            <h3>Today Tasks List</h3>
+            <span className="date">{todayDate}</span>
+          </div>
+          <button className="create-task-btn" onClick={() => navigate("/create")}>
+            + Create Task
+          </button>
         </div>
 
         <div className="dashboard-tabs">
