@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createTask, updateTask, fetchTaskById } from "../api/taskApi";
 
 function Create() {
-  const { id } = useParams(); // Get task ID from URL if editing
+  const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -14,11 +14,8 @@ function Create() {
     dueDate: "",
   });
 
-  // Load task data if editing
   useEffect(() => {
-    if (id) {
-      loadTask();
-    }
+    if (id) loadTask();
   }, [id]);
 
   async function loadTask() {
@@ -43,18 +40,15 @@ function Create() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       if (id) {
-        // Edit existing task
         await updateTask(id, formData);
         alert("Task updated successfully!");
       } else {
-        // Create new task
         await createTask(formData);
         alert("Task created successfully!");
       }
-      navigate("/dashboard"); // Go back to dashboard
+      navigate("/dashboard");
     } catch (err) {
       console.error("Error saving task:", err);
       alert("Failed to save task");
@@ -64,13 +58,16 @@ function Create() {
   };
 
   return (
-    <div className="create-container">
-      <div className="create-card">
-        <h2>{id ? "Edit Task" : "Create Task"}</h2>
+    <div className="h-screen bg-stone-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-[600px] bg-slate-50 rounded-lg border border-slate-200 p-8">
+        <h2 className="text-2xl font-semibold text-slate-700 text-center mb-6">
+          {id ? "Edit Task" : "Create Task"}
+        </h2>
 
-        <form onSubmit={handleSubmit} className="create-form">
-          <div className="form-section title">
-            <label>Title *</label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Title */}
+          <div className="p-4 rounded-md border border-sky-200 bg-sky-50">
+            <label className="block text-sm text-slate-600 mb-1">Title *</label>
             <input
               type="text"
               name="title"
@@ -78,27 +75,32 @@ function Create() {
               onChange={handleChange}
               placeholder="Task title"
               required
+              className="w-full py-2 px-3 border border-slate-300 rounded-md outline-none focus:ring-3 focus:ring-slate-300/30"
             />
           </div>
 
-          <div className="form-section description">
-            <label>Description</label>
+          {/* Description */}
+          <div className="p-4 rounded-md border border-amber-200 bg-amber-50">
+            <label className="block text-sm text-slate-600 mb-1">Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows="3"
               placeholder="Describe the task"
+              className="w-full py-2 px-3 border border-slate-300 rounded-md outline-none resize-none focus:ring-3 focus:ring-slate-300/30"
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-section priority">
-              <label>Priority</label>
+          {/* Priority + Status */}
+          <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+            <div className="p-4 rounded-md border border-rose-200 bg-rose-50">
+              <label className="block text-sm text-slate-600 mb-1">Priority</label>
               <select
                 name="priority"
                 value={formData.priority}
                 onChange={handleChange}
+                className="w-full py-2 px-3 border border-slate-300 rounded-md outline-none focus:ring-3 focus:ring-slate-300/30"
               >
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -107,12 +109,13 @@ function Create() {
               </select>
             </div>
 
-            <div className="form-section status">
-              <label>Status</label>
+            <div className="p-4 rounded-md border border-violet-200 bg-violet-50">
+              <label className="block text-sm text-slate-600 mb-1">Status</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
+                className="w-full py-2 px-3 border border-slate-300 rounded-md outline-none focus:ring-3 focus:ring-slate-300/30"
               >
                 <option value="TODO">Todo</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -122,25 +125,32 @@ function Create() {
             </div>
           </div>
 
-          <div className="form-section">
-            <label>Due Date</label>
+          {/* Due Date */}
+          <div className="p-4 rounded-md border border-slate-200">
+            <label className="block text-sm text-slate-600 mb-1">Due Date</label>
             <input
               type="date"
               name="dueDate"
               value={formData.dueDate}
               onChange={handleChange}
+              className="w-full py-2 px-3 border border-slate-300 rounded-md outline-none focus:ring-3 focus:ring-slate-300/30"
             />
           </div>
 
-          <div className="form-actions">
+          {/* Actions */}
+          <div className="flex gap-3 mt-2">
             <button
               type="button"
-              className="cancel-btn"
+              className="flex-1 py-2.5 px-6 rounded-md bg-slate-200 text-slate-600 font-medium text-sm hover:bg-slate-300 transition-colors cursor-pointer"
               onClick={() => navigate("/dashboard")}
             >
               Cancel
             </button>
-            <button type="submit" className="create-submit-btn" disabled={loading}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-2.5 px-6 rounded-md bg-sky-500 text-white font-medium text-sm hover:bg-sky-600 transition-colors cursor-pointer disabled:bg-slate-400 disabled:cursor-not-allowed"
+            >
               {loading ? "Saving..." : id ? "Update Task" : "Create Task"}
             </button>
           </div>
