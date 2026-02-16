@@ -9,6 +9,9 @@ import com.miraisense.server.exception.TaskNotFoundException;
 import com.miraisense.server.mapper.TaskMapper;
 import com.miraisense.server.repository.TaskRepository;
 import com.miraisense.server.service.TaskService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @CachePut(value = "tasks", key = "#result.id()")
+    @CacheEvict(value = "allTasks", allEntries = true)
     public TaskResponse createTask(TaskRequest taskRequest) {
         Task task = taskMapper.toEntity(taskRequest);   // DTO >> Entity
         Task savedTask = taskRepository.save(task);     // Save >> database
@@ -34,6 +39,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Cacheable(value = "allTasks")
     public List<TaskResponse> getAllTasks() {
         return taskRepository.findAll()
                 .stream()
@@ -42,6 +48,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Cacheable(value = "tasksByStatus", key = "#status")
     public List<TaskResponse> getTasksByStatus(Status status) {
         return taskRepository.findByStatus(status)
                 .stream()
@@ -50,6 +57,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Cacheable(value = "tasksByPriority", key = "#priority")
     public List<TaskResponse> getTasksByPriority(Priority priority) {
         return taskRepository.findByPriority(priority)
                 .stream()
@@ -58,6 +66,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Cacheable(value = "tasks", key = "#id")
     public TaskResponse getTaskById(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
@@ -67,6 +76,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @CachePut(value = "tasks", key = "#id")
+    @CacheEvict(value = {"allTasks", "tasksByStatus", "tasksByPriority"}, allEntries = true)
     public TaskResponse updateTask(Long id, TaskRequest taskRequest) {
 
         Task existingTask = taskRepository.findById(id)
@@ -84,6 +95,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @CachePut(value = "tasks", key = "#id")
+    @CacheEvict(value = {"allTasks", "tasksByStatus", "tasksByPriority"}, allEntries = true)
     public TaskResponse updateTaskStatus(Long id, Status status) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
@@ -95,6 +108,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"tasks", "allTasks", "tasksByStatus", "tasksByPriority"}, key = "#id", allEntries = true)
     public void deleteTask(Long id) {
         if (!taskRepository.existsById(id)) {
             throw new TaskNotFoundException("Task not found with id: " + id);
